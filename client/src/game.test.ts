@@ -54,6 +54,14 @@ describe('winner (general size/k)', () => {
   it('wins on the first run of k when a line is longer than k', () => {
     expect(winner(build(4, { 0: 'X', 1: 'X', 2: 'X', 3: 'X' }), 4, 3)).toEqual({ player: 'X', cells: [0, 1, 2] })
   })
+
+  it('detects a full column on a 4x4 with k=4', () => {
+    expect(winner(build(4, { 0: 'X', 4: 'X', 8: 'X', 12: 'X' }), 4, 4)).toEqual({ player: 'X', cells: [0, 4, 8, 12] })
+  })
+
+  it('detects an anti-diagonal ↙ run on a 5x5 with k=3', () => {
+    expect(winner(build(5, { 3: 'O', 7: 'O', 11: 'O' }), 5, 3)).toEqual({ player: 'O', cells: [3, 7, 11] })
+  })
 })
 
 describe('isDraw', () => {
