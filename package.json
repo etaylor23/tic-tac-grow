@@ -1,0 +1,13 @@
+{
+  "name": "tic-tac-grow",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "setup": "npm --prefix client install && npm --prefix server install && npm --prefix server run prisma:migrate",
+    "dev": "concurrently -n server,client \"npm --prefix server run dev\" \"npm --prefix client start\"",
+    "test": "npm --prefix client test && npm --prefix server test"
+  },
+  "devDependencies": {
+    "concurrently": "^9.1.0"
+  }
+}

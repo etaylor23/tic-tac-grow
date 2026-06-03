@@ -1,0 +1,37 @@
+datasource db {
+  provider = "sqlite"
+  url      = "file:./dev.db"
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model Player {
+  id          Int          @id @default(autoincrement())
+  name        String       @unique
+  createdAt   DateTime     @default(now())
+  gamePlayers GamePlayer[]
+  gamesWon    Game[]       @relation("winner")
+}
+
+model Game {
+  id        Int          @id @default(autoincrement())
+  boardSize Int
+  winLength Int
+  isDraw    Boolean
+  winnerId  Int?
+  winner    Player?      @relation("winner", fields: [winnerId], references: [id])
+  createdAt DateTime     @default(now())
+  players   GamePlayer[]
+}
+
+model GamePlayer {
+  gameId   Int
+  game     Game   @relation(fields: [gameId], references: [id])
+  playerId Int
+  player   Player @relation(fields: [playerId], references: [id])
+  symbol   String // 'X' | 'O' (SQLite has no Prisma enums)
+
+  @@id([gameId, symbol])
+}
