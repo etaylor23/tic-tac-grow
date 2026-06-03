@@ -16,9 +16,11 @@ app.post('/api/games', async (req, res) => {
   }
   try {
     const game = await prisma.$transaction(async (tx) => {
-      await Promise.all(payload.players.map(p =>
+      const players = await Promise.all(payload.players.map(p =>
         tx.player.upsert({ where: { name: p.name }, update: {}, create: { name: p.name } })
       ))
+      const xId = players[payload.players.findIndex(p => p.symbol === 'X')].id
+      const oId = players[payload.players.findIndex(p => p.symbol === 'O')].id
       const winner = payload.winnerName
         ? await tx.player.findUniqueOrThrow({ where: { name: payload.winnerName } })
         : null
@@ -32,6 +34,14 @@ app.post('/api/games', async (req, res) => {
             create: payload.players.map(p => ({
               symbol: p.symbol,
               player: { connect: { name: p.name } }
+            }))
+          },
+          moves: {
+            // X plays the even moves, O the odd ones
+            create: payload.moves.map((position, i) => ({
+              position,
+              moveNumber: i,
+              player: { connect: { id: i % 2 === 0 ? xId : oId } }
             }))
           }
         }

@@ -13,6 +13,7 @@ model Player {
   createdAt   DateTime     @default(now())
   gamePlayers GamePlayer[]
   gamesWon    Game[]       @relation("winner")
+  moves       Move[]
 }
 
 model Game {
@@ -24,6 +25,19 @@ model Game {
   winner    Player?      @relation("winner", fields: [winnerId], references: [id])
   createdAt DateTime     @default(now())
   players   GamePlayer[]
+  moves     Move[]
+}
+
+model Move {
+  id         Int    @id @default(autoincrement())
+  gameId     Int
+  game       Game   @relation(fields: [gameId], references: [id])
+  playerId   Int
+  player     Player @relation(fields: [playerId], references: [id])
+  position   Int
+  moveNumber Int
+
+  @@unique([gameId, moveNumber])
 }
 
 model GamePlayer {

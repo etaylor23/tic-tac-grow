@@ -5,6 +5,7 @@ export type GamePayload = {
   winLength: number
   winnerName: string | null
   isDraw: boolean
+  moves: number[]
 }
 
 const isInt = (value: unknown, min: number, max: number): value is number =>
@@ -13,7 +14,7 @@ const isInt = (value: unknown, min: number, max: number): value is number =>
 // Pure: validate and normalise an incoming game body, throwing on anything malformed.
 export const parseGameBody = (body: any): GamePayload => {
   if (!body || typeof body !== 'object') throw new Error('invalid body')
-  const { players, boardSize, winLength, winnerName, isDraw } = body
+  const { players, boardSize, winLength, winnerName, isDraw, moves } = body
 
   if (!Array.isArray(players) || players.length !== 2) throw new Error('expected two players')
   const parsed: PlayerInput[] = players.map((p: any) => {
@@ -34,5 +35,10 @@ export const parseGameBody = (body: any): GamePayload => {
     throw new Error('winnerName must be one of the players')
   }
 
-  return { players: parsed, boardSize, winLength, winnerName: isDraw ? null : winnerName, isDraw }
+  if (!Array.isArray(moves) || moves.some(m => !isInt(m, 0, boardSize * boardSize - 1))) {
+    throw new Error('moves must be positions on the board')
+  }
+  if (new Set(moves).size !== moves.length) throw new Error('moves must be distinct')
+
+  return { players: parsed, boardSize, winLength, winnerName: isDraw ? null : winnerName, isDraw, moves }
 }

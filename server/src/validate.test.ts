@@ -5,7 +5,8 @@ const valid = {
   boardSize: 3,
   winLength: 3,
   winnerName: 'Ada',
-  isDraw: false
+  isDraw: false,
+  moves: [0, 3, 1, 4, 2]
 }
 
 describe('parseGameBody', () => {
@@ -45,5 +46,17 @@ describe('parseGameBody', () => {
 
   it('rejects a non-boolean isDraw', () => {
     expect(() => parseGameBody({ ...valid, isDraw: 'nope' })).toThrow()
+  })
+
+  it('rejects moves outside the board', () => {
+    expect(() => parseGameBody({ ...valid, moves: [0, 9] })).toThrow()
+  })
+
+  it('rejects duplicate move positions', () => {
+    expect(() => parseGameBody({ ...valid, moves: [0, 0, 1] })).toThrow()
+  })
+
+  it('rejects non-array moves', () => {
+    expect(() => parseGameBody({ ...valid, moves: 'nope' })).toThrow()
   })
 })

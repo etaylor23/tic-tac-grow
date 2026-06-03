@@ -71,3 +71,6 @@ From `server/`:
 - `client/` — React app.
 - `server/` — separate Express + Prisma + SQLite backend; strongly normalised schema. Symbol
   stored as a validated string ('X' | 'O') — Prisma has no enums on SQLite.
+- Persistence: in-progress games live in `localStorage` (`client/src/storage.ts`); finished games
+  sync to the DB. Both share one model — `Player` / `Game` / `GamePlayer` / `Move` — where the move
+  log is the ordered cell positions (board/turn/winner all derive from it).
