@@ -29,8 +29,12 @@ Move(id PK, gameId FK→Game, playerId FK→Player, position, moveNumber)  @@uni
 (`even → X player`), keeping symbol out of the row (it's derivable) — normalised, and matching the
 `moves(game_id, player_id, position, move_number)` shape sketched in spec/3.
 
-`POST /api/games` gains `moves: number[]`; the server validates them (ints in `[0, size²)`, all
-distinct) and creates the `Move` rows inside the existing transaction. `GET /api/stats` is unchanged.
+`POST /api/games` gains `moves: number[]`. The server validates their shape (ints in `[0, size²)`,
+all distinct) and — because the move log is the source of truth — replays them through its own
+`deriveResult(moves, size, k)` (a port of the client's `winner`) to confirm the declared
+`winnerName`/`isDraw`, rejecting (400) a result that doesn't match the log or a log that isn't a
+finished game. `winnerId` comes from the replay, not from the client's claim. It then creates the
+`Move` rows inside the existing transaction. `GET /api/stats` is unchanged.
 
 ### localStorage — `client/src/storage.ts`
 Key `tic-tac-grow:ongoing` holds an array of `OngoingGame`
@@ -64,9 +68,12 @@ and **Discard** (`removeOngoing`).
    allowed. (Implemented first; see spec/3.)
 
 ### Testing
-- Server: extend `validate.test.ts` for `moves` (valid; reject out-of-range / duplicate). Move
-  persistence verified e2e.
-- Client: `storage.test.ts` (jsdom) round-trips; `Main.test.tsx` — a move writes to localStorage, a
-  fresh render shows the resume list, Resume restores the board/turn, finishing posts `moves` and
-  clears the entry, Discard removes it.
-- e2e: play → reload the page → resume → finish → stats update, entry gone, `Move` rows in the DB.
+- Server (pure unit, per spec/3's testing choice): `validate.test.ts` covers `moves` (valid; reject
+  out-of-range / duplicate / non-array); `game.test.ts` covers `winnerSymbol` and `deriveResult`
+  (decisive X/O, draw, and rejection of unfinished or past-a-win logs) — i.e. the replay-and-verify
+  the `POST` handler depends on.
+- Client: `storage.test.ts` (jsdom) round-trips the ongoing-game store; `Main.test.tsx` — a move
+  writes to localStorage, a fresh render shows the resume list, Resume restores the board/turn,
+  finishing posts `moves` and clears the entry, Discard removes it.
+- End-to-end (manual — no browser-test harness is pulled in): play → reload → resume → finish →
+  confirm stats update, the entry is gone, and `Move` rows land in the DB.
