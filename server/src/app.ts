@@ -1,6 +1,7 @@
 import express from 'express'
 import { prisma } from './db'
 import { parseGameBody, GamePayload } from './validate'
+import { deriveResult } from './game'
 import { computeStats } from './stats'
 
 export const app = express()
@@ -14,6 +15,21 @@ app.post('/api/games', async (req, res) => {
     res.status(400).json({ error: (e as Error).message })
     return
   }
+
+  // The move log is the source of truth. Replay it and confirm the client's
+  // claimed result, so stats can't be poisoned by a win that never happened.
+  try {
+    const result = deriveResult(payload.moves, payload.boardSize, payload.winLength)
+    const claimedWinner = payload.players.find(p => p.name === payload.winnerName)?.symbol ?? null
+    if (result.isDraw !== payload.isDraw || result.winner !== claimedWinner) {
+      res.status(400).json({ error: 'result does not match the move log' })
+      return
+    }
+  } catch (e) {
+    res.status(400).json({ error: (e as Error).message })
+    return
+  }
+
   try {
     const game = await prisma.$transaction(async (tx) => {
       const players = await Promise.all(payload.players.map(p =>
@@ -21,15 +37,15 @@ app.post('/api/games', async (req, res) => {
       ))
       const xId = players[payload.players.findIndex(p => p.symbol === 'X')].id
       const oId = players[payload.players.findIndex(p => p.symbol === 'O')].id
-      const winner = payload.winnerName
-        ? await tx.player.findUniqueOrThrow({ where: { name: payload.winnerName } })
-        : null
+      const winnerId = payload.winnerName === null
+        ? null
+        : payload.players.find(p => p.name === payload.winnerName)?.symbol === 'X' ? xId : oId
       return tx.game.create({
         data: {
           boardSize: payload.boardSize,
           winLength: payload.winLength,
           isDraw: payload.isDraw,
-          winnerId: winner?.id ?? null,
+          winnerId,
           players: {
             create: payload.players.map(p => ({
               symbol: p.symbol,
@@ -37,7 +53,7 @@ app.post('/api/games', async (req, res) => {
             }))
           },
           moves: {
-            // X plays the even moves, O the odd ones
+            // X plays the even moves, O the odd ones — verified above against the result
             create: payload.moves.map((position, i) => ({
               position,
               moveNumber: i,
