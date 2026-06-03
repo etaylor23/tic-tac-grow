@@ -15,7 +15,9 @@ export const Cell = React.memo(({ value, index, isWinning, disabled, onClick }: 
     type='button'
     onClick={() => onClick(index)}
     disabled={disabled}
-    className={`aspect-square w-full border-2 border-gray-900 text-xl font-bold flex items-center justify-center disabled:cursor-not-allowed ${isWinning ? 'bg-green-300' : 'bg-white'}`}>
-    {value}
+    className={`relative aspect-square w-full overflow-hidden rounded-md ring-1 transition-colors [container-type:inline-size] ${
+      isWinning ? 'bg-emerald-200 ring-emerald-400' : 'bg-white ring-slate-200 enabled:hover:bg-slate-50'
+    }`}>
+    <span className={`absolute inset-0 flex items-center justify-center text-[55cqw] font-bold leading-none ${value === 'X' ? 'text-indigo-600' : 'text-rose-500'}`}>{value}</span>
   </button>
 )

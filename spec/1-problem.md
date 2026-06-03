@@ -66,7 +66,8 @@ Click on a filled cell → ignore. Click after game over → ignore. First move 
    index `r * size + c`).
 2. **Current player** — ✅ **Store in state, toggle per move.** Toggled inside the click
    handler (never an effect); reset to `X` on new game. (Problem 2 combines this with the board
-   into one `{ board, player }` state so the click handler stays stable for `React.memo`.)
+   into one `{ board, player }` state so the click handler stays stable for `React.memo`; Problem 4
+   adds a `moves` log to the same state for persistence/replay.)
 3. **Componentisation** — ✅ **`Board` + `Cell`.** `Main` owns state; `Board` renders the
    grid; `Cell` is a single square (sets up `React.memo` for Problem 2).
 4. **UX scope** — ✅ all four: turn indicator, result banner, highlight the winning line,

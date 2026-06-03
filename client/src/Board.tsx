@@ -11,7 +11,7 @@ type Props = {
 }
 
 export const Board = ({ board, size, winningCells, gameOver, onCellClick }: Props) =>
-  <div className='grid gap-1 w-full max-w-md' style={{ gridTemplateColumns: `repeat(${size}, minmax(0, 1fr))` }}>
+  <div className='grid gap-1.5 w-full' style={{ gridTemplateColumns: `repeat(${size}, minmax(0, 1fr))` }}>
     {board.map((value, index) =>
       <Cell
         key={index}

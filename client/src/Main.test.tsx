@@ -2,13 +2,15 @@
  * @jest-environment jsdom
  */
 import React from 'react'
-import { render, screen, fireEvent, waitFor, within } from '@testing-library/react'
+import { render, screen, fireEvent, waitFor, within, cleanup } from '@testing-library/react'
 import { Main } from './main'
+import { loadOngoing, saveOngoing } from './storage'
 
 const statsFixture = [{ name: 'Zoe', wins: 3, losses: 1, draws: 0, played: 4 }]
 let fetchMock: jest.Mock
 
 beforeEach(() => {
+  localStorage.clear()
   fetchMock = jest.fn((url: string) =>
     Promise.resolve({
       ok: true,
@@ -142,9 +144,41 @@ describe('Main — persistence & stats', () => {
     await waitFor(() => expect(postCalls()).toHaveLength(1))
     expect(JSON.parse(postCalls()[0][1].body)).toMatchObject({
       players: [{ name: 'Ada', symbol: 'X' }, { name: 'Bob', symbol: 'O' }],
-      boardSize: 3, winLength: 3, winnerName: 'Ada', isDraw: false
+      boardSize: 3, winLength: 3, winnerName: 'Ada', isDraw: false,
+      moves: [0, 3, 1, 4, 2]
     })
     fireEvent.click(cells()[5]) // locked — no extra post
     expect(postCalls()).toHaveLength(1)
+    await waitFor(() => expect(loadOngoing()).toEqual([])) // synced game cleared from localStorage
+  })
+})
+
+describe('Main — ongoing games', () => {
+  it('saves progress and resumes after a refresh', async () => {
+    await renderApp()
+    startGame()
+    fireEvent.click(cells()[0])
+    fireEvent.click(cells()[4])
+    expect(loadOngoing()).toHaveLength(1)
+    expect(loadOngoing()[0].moves).toEqual([0, 4])
+
+    cleanup() // simulate a page refresh
+    await renderApp()
+    fireEvent.click(screen.getByRole('button', { name: 'Resume' }))
+    expect(cells()[0].textContent).toBe('X')
+    expect(cells()[4].textContent).toBe('O')
+    expect(status()).toBe('X to move')
+  })
+
+  it('discards a saved game', async () => {
+    saveOngoing({
+      id: 'g1',
+      players: [{ name: 'Ada', symbol: 'X' }, { name: 'Bob', symbol: 'O' }],
+      boardSize: 3, winLength: 3, moves: [0], updatedAt: '2026-01-01T00:00:00.000Z'
+    })
+    await renderApp()
+    fireEvent.click(screen.getByRole('button', { name: 'Discard' }))
+    expect(loadOngoing()).toEqual([])
+    expect(screen.queryByRole('button', { name: 'Resume' })).toBeNull()
   })
 })
