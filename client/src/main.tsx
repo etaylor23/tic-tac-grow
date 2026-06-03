@@ -76,13 +76,16 @@ export const Main = () => {
           <label className='flex flex-col text-sm gap-1'>
             Player X
             <input className='border-2 border-gray-900 px-2 py-1' aria-label='Player X name'
-              value={nameX} onChange={e => setNameX(e.target.value)} />
+              list='known-players' value={nameX} onChange={e => setNameX(e.target.value)} />
           </label>
           <label className='flex flex-col text-sm gap-1'>
             Player O
             <input className='border-2 border-gray-900 px-2 py-1' aria-label='Player O name'
-              value={nameO} onChange={e => setNameO(e.target.value)} />
+              list='known-players' value={nameO} onChange={e => setNameO(e.target.value)} />
           </label>
+          <datalist id='known-players'>
+            {stats.map(s => <option key={s.name} value={s.name} />)}
+          </datalist>
         </div>
         <div className='flex gap-8'>
           <label className='flex flex-col items-center text-sm gap-1'>

@@ -52,13 +52,20 @@
 - Test React components/interactions with `@testing-library/react` under jsdom (opt in per file
   with `/** @jest-environment jsdom */`).
 
-## Commands (run from `client/`)
-- `npm i` — install dependencies.
-- `npm start` — dev server at http://localhost:3001.
-- `npm test` — run Jest.
-- `npm run lint` — ESLint over `src`.
-- `npm run knip` — report unused files, exports, and dependencies.
-- `npm run build` — production build.
+## Commands
+From the repo root:
+- `npm run setup` — install client + server and create the SQLite DB.
+- `npm run dev` — run the API (:4000) and client (:3001) together (`concurrently`).
+- `npm test` — run both test suites.
+
+From `client/`:
+- `npm start` — dev server at http://localhost:3001 (proxies `/api` → :4000).
+- `npm test` / `npm run lint` / `npm run knip` / `npm run build`.
+
+From `server/`:
+- `npm run dev` — API server on :4000 (`tsx watch`).
+- `npm run prisma:migrate` — apply migrations / create `dev.db`.
+- `npm test` — Prisma-free unit tests (`computeStats`, request validation).
 
 ## Layout
 - `client/` — React app.

@@ -23,7 +23,8 @@ const renderApp = async () => {
   await screen.findByText('Zoe') // flush the mount stats fetch
 }
 
-const textbox = (name: string) => screen.getByRole('textbox', { name }) as HTMLInputElement
+// inputs carry a datalist `list`, so their implicit ARIA role is combobox
+const nameField = (name: string) => screen.getByRole('combobox', { name }) as HTMLInputElement
 const slider = (name: string) => screen.getByRole('slider', { name }) as HTMLInputElement
 const setSlider = (el: HTMLInputElement, value: number) => fireEvent.change(el, { target: { value: String(value) } })
 const status = () => screen.getByRole('status').textContent
@@ -32,8 +33,8 @@ const cells = () => screen.getAllByRole('button').filter(b => !ignore.includes(b
 const postCalls = () => fetchMock.mock.calls.filter(c => c[0] === '/api/games')
 
 const startGame = (opts: { size?: number, k?: number } = {}) => {
-  fireEvent.change(textbox('Player X name'), { target: { value: 'Ada' } })
-  fireEvent.change(textbox('Player O name'), { target: { value: 'Bob' } })
+  fireEvent.change(nameField('Player X name'), { target: { value: 'Ada' } })
+  fireEvent.change(nameField('Player O name'), { target: { value: 'Bob' } })
   if (opts.size) setSlider(slider('Board size'), opts.size)
   if (opts.k) setSlider(slider('Win length'), opts.k)
   fireEvent.click(screen.getByRole('button', { name: 'Start' }))
@@ -44,11 +45,11 @@ describe('Main — setup gate', () => {
     await renderApp()
     const start = () => screen.getByRole('button', { name: 'Start' }) as HTMLButtonElement
     expect(start().disabled).toBe(true)
-    fireEvent.change(textbox('Player X name'), { target: { value: 'Ada' } })
+    fireEvent.change(nameField('Player X name'), { target: { value: 'Ada' } })
     expect(start().disabled).toBe(true)
-    fireEvent.change(textbox('Player O name'), { target: { value: 'Ada' } })
+    fireEvent.change(nameField('Player O name'), { target: { value: 'Ada' } })
     expect(start().disabled).toBe(true)
-    fireEvent.change(textbox('Player O name'), { target: { value: 'Bob' } })
+    fireEvent.change(nameField('Player O name'), { target: { value: 'Bob' } })
     expect(start().disabled).toBe(false)
   })
 
@@ -62,6 +63,16 @@ describe('Main — setup gate', () => {
     expect(slider('Win length').value).toBe('5')
     setSlider(slider('Board size'), 3)
     expect(slider('Win length').value).toBe('3')
+  })
+
+  it('offers known players as autocomplete options', async () => {
+    await renderApp()
+    const listId = nameField('Player X name').getAttribute('list')
+    expect(listId).toBeTruthy()
+    expect(nameField('Player O name').getAttribute('list')).toBe(listId)
+    const datalist = document.getElementById(listId as string) as HTMLDataListElement
+    const values = Array.from(datalist.querySelectorAll('option')).map(o => o.getAttribute('value'))
+    expect(values).toContain('Zoe')
   })
 })
 

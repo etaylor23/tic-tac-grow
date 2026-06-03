@@ -74,13 +74,23 @@ running both, or add a single `concurrently` script.
    reference players; stats aggregate per name across games.
 2. **Backend stack** — ✅ **Express + Prisma + SQLite** (`file:./dev.db`), server in
    **TypeScript**. Strong normalisation and explicit relational modelling via the Prisma schema.
-3. **Schema** — ✅ **Normalised `Player` / `Game` / `GamePlayer`** join. `moves` designed
-   for later, not built now.
+3. **Schema** — ✅ **Normalised `Player` / `Game` / `GamePlayer`** join. (`moves` table added in
+   Problem 4 — see `spec/4-ongoing-games.md`.)
 4. **Persistence trigger** — ✅ **`useEffect` on game-over**, guarded to POST once per game
    (reset on new game).
 5. **Stats UI** — ✅ **Inline panel** showing **Wins / Losses / Draws / Played** per player
    (no router).
 6. **Dev wiring** — ✅ **webpack `/api` proxy → :4000** (default; relative URLs, no CORS).
+
+### Implementation decisions
+- **Name entry** — ✅ **Setup gate.** A setup view (two names + size + k) with **Start**, disabled
+  until names are non-empty and distinct; the board follows, with **New game** (rematch) and
+  **Change setup**. This relocates the size/k sliders into setup (see spec/2).
+- **Backend tests** — ✅ **Pure unit tests** (`computeStats`, `parseGameBody`) + e2e verification
+  (run it, curl, browser). No supertest/integration DB.
+- **Name autocomplete** (Problem 4) — ✅ Setup name inputs use a native `<datalist>` of existing
+  player names, sourced from the `stats` already fetched on mount (players only exist via recorded
+  games, so `stats` lists them all — no new endpoint). Free-typing still allows new names.
 
 ### Prisma + SQLite implications
 - Models: `Player(id, name unique, createdAt)`; `Game(id, boardSize, winLength, isDraw,

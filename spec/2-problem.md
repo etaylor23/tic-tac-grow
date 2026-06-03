@@ -59,7 +59,8 @@ shrink). Resetting mid-game is expected when the size changes.
    `winner(board, size, k)` serves the whole app (Problem 1 = size 3, k 3).
 2. **Size input** — ✅ **Range slider** (3–15).
 3. **Resize timing** — ✅ **Anytime.** Changing size *or* `k` starts a fresh board via a single
-   `newGame(size, k)` handler — never an effect.
+   `newGame(size, k)` handler — never an effect. (Problem 3's setup gate later relocates the size/k
+   sliders into the setup view — chosen before **Start** — so a fresh board is created on Start.)
 4. **Memoisation** — ✅ **`React.memo(Cell)` + `useCallback` onClick**, justified by 15×15
    scale, with a one-line note on why.
 5. **Layout** — ✅ **CSS Grid** via inline `gridTemplateColumns` (default).
