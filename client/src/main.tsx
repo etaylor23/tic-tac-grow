@@ -63,15 +63,17 @@ export const Main = () => {
     setOngoing(loadOngoing())
   }
 
-  // stable across moves (deps only change on a new game), so React.memo(Cell) is effective
+  // no deps, so it's stable for the component's life and React.memo(Cell) holds.
+  // Post-win/occupied clicks are blocked by Board's `disabled` prop; the occupied
+  // guard here is just the reducer keeping its own invariant.
   const handleCellClick = useCallback((index: number) => {
     setGame(prev => {
-      if (prev.board[index] || winner(prev.board, size, k)) return prev
+      if (prev.board[index]) return prev
       const board = prev.board.slice()
       board[index] = prev.player
       return { board, player: prev.player === 'X' ? 'O' : 'X', moves: [...prev.moves, index] }
     })
-  }, [size, k])
+  }, [])
 
   // side effect: keep the in-progress game in localStorage as it's played
   useEffect(() => {
