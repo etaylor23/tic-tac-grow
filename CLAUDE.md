@@ -12,6 +12,15 @@
 - Do not abstract for hypothetical future needs.
 - Match the existing code style exactly.
 
+## Development flow (per problem)
+1. Spec — capture the problem and decisions in `spec/N-problem.md`.
+2. Unit tests — write failing tests for the pure logic (`game.ts`) first.
+3. Component tests — write failing React component/interaction tests next.
+4. Implementation — write the minimum code to make the tests pass.
+5. Lint & prune — run `npm run lint` and `npm run knip`; fix lint errors and remove dead
+   code/exports/deps (see `spec/tooling.md`).
+6. Reconcile — keep spec, tests, and implementation in lock step; update the spec if reality diverges.
+
 ## Style
 - No semicolons, single quotes, 2-space indentation.
 - Function components, named exports, arrow functions.
@@ -39,13 +48,16 @@
 - Don't add tooling or config beyond what a feature requires.
 
 ## Testing
-- Unit-test pure game logic (node environment).
-- DOM/component tests require adding jsdom + `@testing-library/react`.
+- Unit-test pure game logic in the node environment.
+- Test React components/interactions with `@testing-library/react` under jsdom (opt in per file
+  with `/** @jest-environment jsdom */`).
 
 ## Commands (run from `client/`)
 - `npm i` — install dependencies.
 - `npm start` — dev server at http://localhost:3001.
 - `npm test` — run Jest.
+- `npm run lint` — ESLint over `src`.
+- `npm run knip` — report unused files, exports, and dependencies.
 - `npm run build` — production build.
 
 ## Layout
