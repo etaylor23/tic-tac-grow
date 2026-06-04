@@ -72,6 +72,36 @@ a win that never happened.
 | Persistence | [`storage.ts`](client/src/storage.ts) · [`api.ts`](client/src/api.ts) | localStorage + fetch |
 | Server | [`game.ts`](server/src/game.ts) · [`validate.ts`](server/src/validate.ts) · [`app.ts`](server/src/app.ts) · [`stats.ts`](server/src/stats.ts) | verify · validate · routes · tally |
 
+## How it was built — spec- and test-driven
+
+Each problem followed one loop, defined in
+[CLAUDE.md → Development flow (per problem)](https://github.com/etaylor23/tic-tac-grow/blob/main/CLAUDE.md#development-flow-per-problem):
+
+1. **Spec** — capture the problem and the decisions in [`spec/N-problem.md`](spec).
+2. **Unit tests** — write *failing* tests for the pure logic (`game.ts`) first.
+3. **Component tests** — write *failing* `@testing-library/react` interaction tests next.
+4. **Implementation** — the minimum code to turn the tests green.
+5. **Lint & prune** — `npm run lint` and `npm run knip`; fix style, delete dead code/exports/deps.
+6. **Reconcile** — keep spec, tests and code in lock step; update the spec when reality diverges.
+
+**Spec-driven practices followed**
+- *Decisions recorded with rationale.* Each spec lists the options weighed and **why** one won
+  (configurable k-in-a-row over a full-line win; named players over symbol-only), so the
+  reasoning outlives the diff.
+- *Decisions locked explicitly.* Every spec ends with a "Decisions (locked)" list, separating
+  settled choices from open questions.
+- *The spec stays honest.* When code diverged, the spec was corrected to match (Problem 4's
+  testing section) rather than left to rot — step 6 in practice.
+- *One model, end to end.* The canonical move-log in spec/4 maps straight onto `deriveResult`
+  and its tests — the spec describes exactly what the code enforces.
+
+**Test-driven, by layer**
+- Pure logic (`game.ts`, client and server) is tested in the fast Node environment; components
+  run under jsdom via `/** @jest-environment jsdom */`, with `Main.test.tsx` driving full user
+  flows (setup → play → win/draw → resume → leaderboard).
+- Those tests doubled as the **refactor safety net**: `Main` was split into `Setup`/`Play` with
+  `Main.test.tsx` left untouched and green, proving behaviour was unchanged.
+
 ## What's been taken into consideration
 
 The project follows [`CLAUDE.md`](CLAUDE.md): brevity and clarity, the simplest solution that
