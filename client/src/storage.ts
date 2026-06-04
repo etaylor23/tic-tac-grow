@@ -1,20 +1,21 @@
-import { OngoingGame } from './api'
+import { OngoingGame } from "./api";
 
-const KEY = 'tic-tac-grow:ongoing'
+const KEY = "tic-tac-grow:ongoing";
 
 export const loadOngoing = (): OngoingGame[] => {
   try {
-    const parsed = JSON.parse(localStorage.getItem(KEY) ?? '[]')
-    return Array.isArray(parsed) ? parsed : []
+    const parsed = JSON.parse(localStorage.getItem(KEY) ?? "[]");
+    return Array.isArray(parsed) ? parsed : [];
   } catch {
-    return []
+    return [];
   }
-}
+};
 
-const writeAll = (games: OngoingGame[]) => localStorage.setItem(KEY, JSON.stringify(games))
+const writeAll = (games: OngoingGame[]) =>
+  localStorage.setItem(KEY, JSON.stringify(games));
 
 export const saveOngoing = (game: OngoingGame): void =>
-  writeAll([game, ...loadOngoing().filter(g => g.id !== game.id)])
+  writeAll([game, ...loadOngoing().filter((g) => g.id !== game.id)]);
 
 export const removeOngoing = (id: string): void =>
-  writeAll(loadOngoing().filter(g => g.id !== id))
+  writeAll(loadOngoing().filter((g) => g.id !== id));

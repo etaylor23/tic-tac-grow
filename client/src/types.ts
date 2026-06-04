@@ -1,2 +1,2 @@
-export type XorO = 'X' | 'O'
-export type CellValue = XorO | undefined
+export type XorO = "X" | "O";
+export type CellValue = XorO | undefined;
