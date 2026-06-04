@@ -11,7 +11,9 @@ type Game = { board: CellValue[]; player: XorO; moves: number[] };
 
 // crypto.randomUUID is absent in older browsers and some test runtimes (jsdom);
 // TS's lib types don't capture that, so widen the type to keep the guard honest.
-const cryptoApi = globalThis.crypto as { randomUUID?: () => string } | undefined;
+const cryptoApi = globalThis.crypto as
+  | { randomUUID?: () => string }
+  | undefined;
 
 const newId = (): string =>
   cryptoApi?.randomUUID?.() ??

@@ -6,9 +6,12 @@
   "scripts": {
     "setup": "npm install && npm --prefix client install && npm --prefix server install && npm --prefix server run prisma:migrate",
     "dev": "concurrently -n server,client \"npm --prefix server run dev\" \"npm --prefix client start\"",
-    "test": "npm --prefix client test && npm --prefix server test"
+    "test": "npm --prefix client test && npm --prefix server test",
+    "format": "prettier --write .",
+    "format:check": "prettier --check ."
   },
   "devDependencies": {
-    "concurrently": "^9.1.0"
+    "concurrently": "^9.1.0",
+    "prettier": "^3.4.2"
   }
 }

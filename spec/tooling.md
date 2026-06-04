@@ -4,6 +4,7 @@ Two quality gates run after implementation, before reconciling (see the Developm
 [CLAUDE.md](../CLAUDE.md)). Both live in `client/` and exit non-zero on findings.
 
 ## ESLint — type-aware correctness linting
+
 - **Command:** `npm run lint` (`eslint src`, scoped to source so config files aren't linted).
 - **Config:** `client/eslint.config.js` (flat config, CommonJS to match the repo's other configs).
 - **Rule sets:**
@@ -30,6 +31,7 @@ Two quality gates run after implementation, before reconciling (see the Developm
   support v10. v9 is current and is the canonical pairing for this plugin set.
 
 ## knip — dead-code & dependency pruning
+
 - **Command:** `npm run knip`.
 - **Config:** `client/knip.json`.
   - `entry`: the test files (`src/**/*.test.{ts,tsx}`). The app entry `src/index.tsx` is detected
@@ -44,6 +46,7 @@ Two quality gates run after implementation, before reconciling (see the Developm
   to `ignoreDependencies` in `knip.json` rather than deleting it.
 
 ## How they fit the flow
+
 After the tests are green, run `npm run lint` and `npm run knip`. Lint failures are fixed in
 place; knip findings are either removed (genuine dead code/deps) or explicitly ignored (traced
 false positives). Only then reconcile spec ↔ tests ↔ implementation.
