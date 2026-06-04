@@ -2,6 +2,7 @@
   "name": "tic-tac-grow",
   "version": "1.0.0",
   "private": true,
+  "type": "module",
   "scripts": {
     "setup": "npm install && npm --prefix client install && npm --prefix server install && npm --prefix server run prisma:migrate",
     "dev": "concurrently -n server,client \"npm --prefix server run dev\" \"npm --prefix client start\"",

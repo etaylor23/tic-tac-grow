@@ -22,7 +22,8 @@
 6. Reconcile — keep spec, tests, and implementation in lock step; update the spec if reality diverges.
 
 ## Style
-- No semicolons, single quotes, 2-space indentation.
+- Formatting is Prettier-enforced (`prettier.config.js`): semicolons, double quotes,
+  trailing commas (all), 2-space indent, 80-col width, always-parenthesised arrow params.
 - Function components, named exports, arrow functions.
 - Style with Tailwind; avoid raw CSS unless Tailwind cannot express it.
 - Add `key` props to every mapped list.
