@@ -1,3 +1,5 @@
+import { XorO } from "./types";
+
 export type Stat = {
   name: string;
   wins: number;
@@ -6,7 +8,7 @@ export type Stat = {
   played: number;
 };
 
-type PlayerInput = { name: string; symbol: "X" | "O" };
+type PlayerInput = { name: string; symbol: XorO };
 
 export type GamePayload = {
   players: PlayerInput[];
@@ -37,5 +39,5 @@ export const postGame = async (payload: GamePayload): Promise<void> => {
 
 export const fetchStats = async (): Promise<Stat[]> => {
   const res = await fetch("/api/stats");
-  return res.json();
+  return res.json() as Promise<Stat[]>;
 };

@@ -3,5 +3,6 @@ import { createRoot } from "react-dom/client";
 import "./assets/index";
 import { Main } from "./main";
 
-const root = createRoot(document.getElementById("root")!);
-root.render(<Main />);
+const container = document.getElementById("root");
+if (!container) throw new Error("missing #root element");
+createRoot(container).render(<Main />);

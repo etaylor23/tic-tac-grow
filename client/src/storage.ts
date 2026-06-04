@@ -4,8 +4,8 @@ const KEY = "tic-tac-grow:ongoing";
 
 export const loadOngoing = (): OngoingGame[] => {
   try {
-    const parsed = JSON.parse(localStorage.getItem(KEY) ?? "[]");
-    return Array.isArray(parsed) ? parsed : [];
+    const parsed: unknown = JSON.parse(localStorage.getItem(KEY) ?? "[]");
+    return Array.isArray(parsed) ? (parsed as OngoingGame[]) : [];
   } catch {
     return [];
   }

@@ -3,21 +3,29 @@
 Two quality gates run after implementation, before reconciling (see the Development flow in
 [CLAUDE.md](../CLAUDE.md)). Both live in `client/` and exit non-zero on findings.
 
-## ESLint — correctness linting
+## ESLint — type-aware correctness linting
 - **Command:** `npm run lint` (`eslint src`, scoped to source so config files aren't linted).
 - **Config:** `client/eslint.config.js` (flat config, CommonJS to match the repo's other configs).
 - **Rule sets:**
   - `@eslint/js` recommended — core JS correctness.
-  - `typescript-eslint` recommended — TypeScript correctness (untyped/fast; `tsc` already does
-    type-aware checking, so no `parserOptions.project` here).
-  - `eslint-plugin-react-hooks` — `rules-of-hooks` (error) and `exhaustive-deps` (warn). This is
-    the rule set the brief most cares about: it enforces correct hook usage and flags effects
-    with missing/incorrect dependencies.
-  - `eslint-plugin-react` — only `jsx-uses-react` + `jsx-uses-vars` enabled. The project uses the
-    classic JSX runtime (`import React`, `jsx: 'react'`), so these stop `no-unused-vars` from
-    falsely flagging `React` and JSX-referenced component imports. The plugin's noisier rules
-    (e.g. `prop-types`) are intentionally left off — types come from TypeScript.
-  - Test files get Jest globals (`describe`/`it`/`expect`/`jest`) via a `*.test.*` override.
+  - `typescript-eslint` **strictTypeChecked + stylisticTypeChecked** — the aggressive, type-aware
+    preset. It bans implicit/unsafe `any` (unsafe assignment / return / argument / member access),
+    unhandled promises, unnecessary conditions and more. Type information comes from the TypeScript
+    **project service** (`parserOptions.projectService`), so the lint reasons about real types, not
+    just syntax — it catches looseness `tsc` permits (e.g. `res.json()` flowing in as `any`).
+  - `eslint-plugin-react-hooks` — `rules-of-hooks` (error) and `exhaustive-deps` (warn). Enforces
+    correct hook usage and flags effects with missing/incorrect dependencies.
+  - `eslint-plugin-react` — only `jsx-uses-react` + `jsx-uses-vars` (classic JSX runtime
+    `import React`, `jsx: 'react'`); the noisier rules (e.g. `prop-types`) stay off — types come
+    from TypeScript.
+  - **Tuned for signal over noise** (safety rules stay strict; style/ergonomic ones are eased):
+    `consistent-type-definitions` off (`type` aliases are fine), `no-confusing-void-expression`
+    with `ignoreArrowShorthand` (allows `onClick={() => doThing()}`), `restrict-template-expressions`
+    with `allowNumber` (interpolating numbers is safe).
+  - **Test override** (`*.test.{ts,tsx}`): Jest globals, plus the production-grade type-safety
+    rules relaxed (the `no-unsafe-*` family, `no-non-null-assertion`, `no-empty-function`, and the
+    unnecessary-assertion/conversion rules). Tests lean on loose `fetch` mocks, DOM assertions and
+    no-op stubs, where those rules fight test ergonomics without improving shipped code.
 - **Version note:** pinned to ESLint **v9**, not v10 — `eslint-plugin-react@7` does not yet
   support v10. v9 is current and is the canonical pairing for this plugin set.
 

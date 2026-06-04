@@ -9,8 +9,12 @@ import { loadOngoing, saveOngoing, removeOngoing } from "./storage";
 type Phase = "setup" | "playing";
 type Game = { board: CellValue[]; player: XorO; moves: number[] };
 
+// crypto.randomUUID is absent in older browsers and some test runtimes (jsdom);
+// TS's lib types don't capture that, so widen the type to keep the guard honest.
+const cryptoApi = globalThis.crypto as { randomUUID?: () => string } | undefined;
+
 const newId = (): string =>
-  globalThis.crypto?.randomUUID?.() ??
+  cryptoApi?.randomUUID?.() ??
   `${Date.now()}-${Math.random().toString(36).slice(2)}`;
 
 export const Main = () => {
@@ -133,7 +137,9 @@ export const Main = () => {
         removeOngoing(gameId);
         setStatsVersion((v) => v + 1);
       })
-      .catch(() => {});
+      .catch(() => {
+        /* best-effort sync: a failed POST just leaves stats unchanged */
+      });
   }, [gameOver, win, draw, nameX, nameO, size, k, gameId, game.moves]);
 
   // side effect: load stats on mount and after each recorded game
@@ -143,7 +149,9 @@ export const Main = () => {
       .then((s) => {
         if (active) setStats(s);
       })
-      .catch(() => {});
+      .catch(() => {
+        /* stats are non-critical; ignore fetch failures */
+      });
     return () => {
       active = false;
     };
